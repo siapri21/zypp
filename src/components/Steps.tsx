@@ -1,36 +1,45 @@
 const steps = [
-  { title: "Scanner", desc: "Scannez le QR code pour déverrouiller.", img: "/icons/scan.png" },
-  { title: "Rouler",  desc: "Circulez librement en ville.",            img: "/icons/ride.png" },
-  { title: "Déposer", desc: "Garez-vous en zone autorisée puis verrouillez.", img: "/icons/park.png" },
+  { title: "Scanner", desc: "Scannez le QR code pour déverrouiller.", img: "/QR-code-1.jpg" },
+  { title: "Rouler",  desc: "Circulez librement en ville.",            img: "/deposer.jpg" },
+  { title: "Déposer", desc: "Garez-vous en zone autorisée puis verrouillez.", img: "/header.png" },
 ];
 
 export default function Steps() {
   return (
-    <section id="how" className="mx-auto max-w-6xl px-4 py-16">
-      <h2 className="text-2xl font-bold mb-8">Comment ça marche ?</h2>
+    <section id="how" className="mx-auto max-w-6xl px-4 py-10">
+      <h2 className="text-2xl font-bold mb-6">Comment ça marche ?</h2>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid gap-5 md:grid-cols-3">
         {steps.map((s, i) => (
-          <div
+          <article
             key={i}
-            className="group relative flex flex-col rounded-2xl border border-black/10 bg-white p-6 transition
-                       hover:border-green/60 hover:shadow-md"
+            className="group rounded-2xl bg-[#F1E9E2] border border-[#E6D9CE]
+                       shadow-[0_6px_18px_rgba(241,233,226,0.9)]
+                       transition-all duration-300 hover:-translate-y-1
+                       hover:shadow-[0_12px_26px_rgba(241,233,226,1)]
+                       hover:ring-1 hover:ring-green/40"
           >
-            <div className="text-xl font-semibold">
-              {i + 1}. <span className="transition group-hover:text-green">{s.title}</span>
+            <div className="p-4">
+              {/* image réduite et propre */}
+              <div className="relative overflow-hidden rounded-xl bg-white/70">
+                <img
+                  src={s.img}
+                  alt={s.title}
+                  className="w-full h-28 md:h-32 object-contain mx-auto"
+                />
+                <span className="absolute inset-0 bg-green/0 group-hover:bg-green/10 transition-colors" />
+              </div>
+
+              {/* texte */}
+              <div className="pt-3">
+                <h3 className="text-base font-semibold">{i + 1}. {s.title}</h3>
+                <p className="text-sm text-[#0F2554]/70">{s.desc}</p>
+              </div>
             </div>
-            <p className="mt-3 text-gray-600">{s.desc}</p>
 
-            {/* icône petite, collée en bas */}
-            <img
-              src={s.img}
-              alt=""
-              className="mt-auto h-8 w-8 opacity-80 transition group-hover:opacity-100"
-            />
-
-            {/* barre d’accent en bas au hover */}
-            <span className="pointer-events-none absolute bottom-0 left-0 h-1 w-0 bg-green transition-all group-hover:w-full" />
-          </div>
+            {/* barre d’accent */}
+            <span className="block h-1 w-0 bg-green transition-all duration-300 group-hover:w-full" />
+          </article>
         ))}
       </div>
     </section>

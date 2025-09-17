@@ -6,7 +6,6 @@ export default function Hero() {
     <>
       {/* HERO */}
       <section className="relative overflow-hidden">
-        {/* Image en fond */}
         <motion.img
           initial={{ opacity: 0, scale: 1.02 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -15,61 +14,43 @@ export default function Hero() {
           alt="Trottinette en ville"
           className="absolute inset-0 h-full w-full object-cover -z-10"
         />
-
-        {/* Voile sombre */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent -z-10" />
-
-        {/* Contenu slogan */}
         <div className="mx-auto max-w-6xl px-4 py-20 md:py-28 min-h-[360px] grid items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-white">
-              La ville, à portée de trottinette
-            </h1>
-            <p className="mt-4 text-lg text-white/90">
-              1€ départ puis 0,15€/min. Montpellier dès janvier 2025.
-            </p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <h1 className="text-4xl md:text-5xl font-bold text-white">La ville, à portée de trottinette</h1>
+            <p className="mt-4 text-lg text-white/90">1€ départ puis 0,15€/min. Montpellier dès janvier 2025.</p>
           </motion.div>
         </div>
       </section>
 
-      {/* CARDS qui chevauchent */}
-      <div className="mx-auto max-w-6xl px-4 -mt-16 md:-mt-24 relative z-10">
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Carte Connexion */}
-          <div className="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-black/5 flex flex-col items-start">
-            <h3 className="text-xl font-semibold">Déjà inscrit ?</h3>
-            <p className="mt-2 text-black/70 text-sm">
-              Accédez à votre compte et reprenez la route.
-            </p>
-            <Link to="/login" className="mt-4 px-4 py-2 rounded-xl bg-green text-white">
-              Connexion
-            </Link>
+      {/* 2 CARDS */}
+      <div className="mx-auto max-w-6xl px-4 -mt-16 md:-mt-24 relative z-10 grid md:grid-cols-2 gap-6">
+        {/* Card Stats */}
+        <div className="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-black/5">
+          <h3 className="text-lg font-semibold mb-4">Chiffres clés</h3>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-3xl font-bold">1000</div>
+              <div className="text-sm text-black/70">trottinettes janv. 2025</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold">24/7</div>
+              <div className="text-sm text-black/70">service</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold">0,15€</div>
+              <div className="text-sm text-black/70">par minute</div>
+            </div>
           </div>
+        </div>
 
-          {/* Carte Inscription */}
-          <div className="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-black/5 flex flex-col items-start">
-            <h3 className="text-xl font-semibold">Nouveau ?</h3>
-            <p className="mt-2 text-black/70 text-sm">
-              Créez votre compte et profitez des trajets en toute liberté.
-            </p>
-            <Link to="/register" className="mt-4 px-4 py-2 rounded-xl bg-green text-white">
-              Créer un compte
-            </Link>
-          </div>
-
-          {/* Carte Découverte */}
-          <div className="rounded-2xl bg-[#0F2554] p-6 shadow-xl ring-1 ring-black/5 text-white flex flex-col items-start">
-            <h3 className="text-xl font-semibold">Découvrir</h3>
-            <p className="mt-2 text-white/80 text-sm">
-              Vous utilisez notre service pour la première fois ?
-            </p>
-            <Link to="/discover" className="mt-4 px-4 py-2 rounded-xl bg-white text-[#0F2554]">
-              Je découvre
-            </Link>
+        {/* Card Membre */}
+        <div className="rounded-2xl bg-[#FFAA75] p-6 shadow-xl ring-1 ring-black/5 text-white">
+          <h3 className="text-lg font-semibold mb-2">Espace membre</h3>
+          <p className="text-white/80 text-sm">Connectez-vous ou inscrivez-vous pour commencer.</p>
+          <div className="mt-4 flex gap-3">
+            <Link to="/login" className="px-4 py-2 rounded-xl bg-white text-[#0F2554]">Connexion</Link>
+            <Link to="/register" className="px-4 py-2 rounded-xl border border-white/40">Inscription</Link>
           </div>
         </div>
       </div>

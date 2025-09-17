@@ -1,7 +1,7 @@
 import Hero from "../components/Hero";
 import Steps from "../components/Steps";
 import Advantages from "../components/Advantages";
-import Stats from "../components/Stats";
+// import Stats from "../components/Stats";
 import { useEffect } from "react";
 import Download from "../components/Download";
 
@@ -20,7 +20,7 @@ export default function Home({anchor}:{anchor?:string}){
     
       <Steps />
       <Advantages />
-      <Stats />
+      {/* <Stats /> */}
       <Download/> 
     </>
   );
