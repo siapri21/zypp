@@ -4,7 +4,7 @@ import Advantages from "../components/Advantages";
 import Stats from "../components/Stats";
 import { useEffect } from "react";
 import Download from "../components/Download";
-import Features from "../components/Features";
+
 
 export default function Home({anchor}:{anchor?:string}){
   useEffect(()=>{
@@ -17,11 +17,11 @@ export default function Home({anchor}:{anchor?:string}){
   return (
     <>
       <Hero />
-      <Features />
+    
       <Steps />
-      <Download/> 
       <Advantages />
       <Stats />
+      <Download/> 
     </>
   );
 }
