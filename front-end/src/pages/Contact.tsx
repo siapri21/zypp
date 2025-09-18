@@ -1,4 +1,4 @@
-import CityMap from "../components/CityMap";
+import CityMap from "./CityMap";
 import { useState } from "react";
 
 export default function Contact(){

@@ -62,7 +62,7 @@ export default function AdvantagesAndAbout() {
 
           <a
             href="#download"
-            className="mt-8 inline-block rounded-full bg-green-500 px-6 py-3 text-white font-semibold"
+            className="mt-8 inline-block rounded-full bg-[#FFAA75] px-6 py-3 text-white font-semibold"
           >
             Télécharger l’application
           </a>
