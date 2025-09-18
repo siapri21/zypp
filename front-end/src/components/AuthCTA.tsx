@@ -1,15 +1,29 @@
-import { Link } from "react-router-dom";
-export default function AuthCTA(){
-  return (
-    <section className="bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="text-2xl font-semibold">Votre espace Zypp</h2>
-        <p className="mt-2 text-ink/70">Gérez vos trajets, factures et moyens de paiement.</p>
-        <div className="mt-6 flex gap-4">
-          <Link to="/login" className="px-4 py-3 rounded-xl bg-green text-white">Connexion</Link>
-          <Link to="/register" className="px-4 py-3 rounded-xl border border-ink/20">Créer un compte</Link>
-        </div>
-      </div>
-    </section>
-  );
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+type User = { id: string; email: string; name?: string } | null;
+type Ctx = { user: User; token: string | null; login: (t: string)=>void; logout: ()=>void; refresh: ()=>Promise<void> };
+const AuthCtx = createContext<Ctx | null>(null);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [user, setUser] = useState<User>(null);
+
+  async function refresh() {
+    if (!token) { setUser(null); return; }
+    const r = await fetch(`${API}/api/me`, { headers: { Authorization: `Bearer ${token}` } });
+    setUser(r.ok ? await r.json() : null);
+  }
+  function login(t: string) { localStorage.setItem("token", t); setToken(t); }
+  function logout() { localStorage.removeItem("token"); setToken(null); setUser(null); }
+
+  useEffect(() => { void refresh(); }, [token]);
+  const value = useMemo(() => ({ user, token, login, logout, refresh }), [user, token]);
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthCtx);
+  if (!ctx) throw new Error("useAuth must be used within <AuthProvider>");
+  return ctx;
 }

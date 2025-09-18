@@ -1,7 +1,8 @@
-import { NavLink } from "react-router-dom";
+import {  NavLink } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { useState } from "react";
-import { useI18n } from "../i18n"; // <-- contexte global
+import { useI18n } from "../i18n";
+import { useAuth } from "./AuthCTA";
 
 const linkDefs = [
   { to: "/", key: "home" },
@@ -12,7 +13,8 @@ const linkDefs = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { lang, setLang, t } = useI18n(); // <-- récupère langue + traductions
+  const { lang, setLang, t } = useI18n();
+  const {user, logout} = useAuth();
 
   return (
     <header className="sticky top-0 z-50 bg-bg/50 backdrop-blur border-b border-ink/10">
@@ -28,7 +30,10 @@ export default function Navbar() {
         <ul className="hidden md:flex items-center gap-6">
           {linkDefs.map(l => (
             <li key={l.to}>
-              <NavLink to={l.to} className={({isActive}) => `hover:text-green ${isActive ? "text-green" : ""}`}>
+              <NavLink
+                to={l.to}
+                className={({ isActive }) => `hover:text-green ${isActive ? "text-green" : ""}`}
+              >
                 {t(l.key)}
               </NavLink>
             </li>
@@ -47,10 +52,28 @@ export default function Navbar() {
             </select>
           </li>
 
-          <li className="flex items-center gap-2">
-            <NavLink to="/login" className="px-3 py-2 rounded-xl border border-ink/20">{t("login")}</NavLink>
-            <NavLink to="/app" className="px-3 py-2 rounded-xl bg-green text-white">{t("app")}</NavLink>
-          </li>
+          {user ? (
+            <li className="flex items-center gap-2">
+              <NavLink to="/account" className="px-3 py-2 rounded-xl border border-ink/20">
+                {t("account") ?? "Mon compte"}
+              </NavLink>
+              <button
+                onClick={() => logout?.()}
+                className="px-3 py-2 rounded-xl bg-ink text-white text-sm"
+              >
+                {t("logout") ?? "Se déconnecter"}
+              </button>
+            </li>
+          ) : (
+            <li className="flex items-center gap-2">
+              <NavLink to="/login" className="px-3 py-2 rounded-xl border border-ink/20">
+                {t("login")}
+              </NavLink>
+              <NavLink to="/register" className="px-3 py-2 rounded-xl bg-green text-white">
+                {t("register") ?? "Inscription"}
+              </NavLink>
+            </li>
+          )}
         </ul>
       </nav>
 
@@ -58,7 +81,9 @@ export default function Navbar() {
         <ul className="md:hidden px-4 pb-4 space-y-2 border-t border-ink/10">
           {linkDefs.map(l => (
             <li key={l.to}>
-              <NavLink to={l.to} onClick={() => setOpen(false)}>{t(l.key)}</NavLink>
+              <NavLink to={l.to} onClick={() => setOpen(false)}>
+                {t(l.key)}
+              </NavLink>
             </li>
           ))}
           <li className="flex items-center gap-2 pt-2">
@@ -72,12 +97,29 @@ export default function Navbar() {
               <option value="en">English</option>
               <option value="es">Español</option>
             </select>
-            <NavLink to="/login" onClick={() => setOpen(false)} className="px-3 py-2 rounded-xl border">
-              {t("login")}
-            </NavLink>
-            <NavLink to="/app" onClick={() => setOpen(false)} className="px-3 py-2 rounded-xl bg-green text-white">
-              {t("app")}
-            </NavLink>
+
+            {user ? (
+              <>
+                <NavLink to="/account" onClick={() => setOpen(false)} className="px-3 py-2 rounded-xl border">
+                  {t("account") ?? "Mon compte"}
+                </NavLink>
+                <button
+                  onClick={() => { logout?.(); setOpen(false); }}
+                  className="px-3 py-2 rounded-xl bg-ink text-white text-sm"
+                >
+                  {t("logout") ?? "Se déconnecter"}
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" onClick={() => setOpen(false)} className="px-3 py-2 rounded-xl border">
+                  {t("login")}
+                </NavLink>
+                <NavLink to="/register" onClick={() => setOpen(false)} className="px-3 py-2 rounded-xl bg-green text-white">
+                  {t("register") ?? "Inscription"}
+                </NavLink>
+              </>
+            )}
           </li>
         </ul>
       )}

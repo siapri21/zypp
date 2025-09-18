@@ -5,8 +5,9 @@ import Home from "./pages/Home";
 import Contact from "./pages/Contact";
 import Rechargeur from "./pages/Rechargeur";
 import Login from "./pages/Login";
-import Register from "./components/Register";
+import Register from "./pages/Register";
 import CityMap from "./pages/CityMap";
+import ProtectedRoute from "./components/ProtecteRoute";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/app" element={<Home anchor="app" />} />
           <Route path="/carte" element={<CityMap />} />
+          <Route path="/account" element={<ProtectedRoute><Home anchor="account" /></ProtectedRoute>} />
         </Routes>
       </main>
       <Footer />
