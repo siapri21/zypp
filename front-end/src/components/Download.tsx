@@ -14,14 +14,14 @@ export default function Download() {
             <div className="flex flex-col items-end">
               <a href="#" className="block max-w-[250px] w-full mt-16">
                 <img
-                  src="/public/appstore-logo-transparent-free-png.webp"
+                  src="/appstore-logo-transparent-free-png.webp"
                   alt="App Store"
                   className="w-full h-auto"
                 />
               </a>
               <a href="#" className="block max-w-[250px] w-full">
                 <img
-                  src="/public/Google-Play-Store-app.webp"
+                  src="/Google-Play-Store-app.webp"
                   alt="Google Play"
                   className="w-full h-auto"
                 />
@@ -31,7 +31,7 @@ export default function Download() {
             {/* Mockup téléphone */}
             <div className="block max-w-[350px] w-full">
               <img
-                src="/public/ChatGPT_Image_17_sept._2025__10_32_22-removebg-preview.png"
+                src="/ChatGPT_Image_17_sept._2025__10_32_22-removebg-preview.png"
                 alt="Aperçu application"
                 className="w-full h-auto object-contain"
               />

@@ -28,7 +28,7 @@ export default function Rechargeur() {
 
           {/* Inline SVG illustration to avoid external assets */}
           <div className="mx-auto w-full max-w-md">
-           <img src="/public/communityIcon_q9f94omolyf91-removebg-preview.png" alt="" />
+           <img src="/communityIcon_q9f94omolyf91-removebg-preview.png" alt="" />
           </div>
         </div>
       </div>

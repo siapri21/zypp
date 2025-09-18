@@ -10,7 +10,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 1.02 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          src="/public/personne-qui-marche-par-son-scooter-electrique.jpg"
+          src="/personne-qui-marche-par-son-scooter-electrique.jpg"
           alt="Trottinette en ville"
           className="absolute inset-0 h-full w-full object-cover -z-10"
         />
