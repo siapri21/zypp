@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL ?? ""; // "" si proxy Vite vers 3000
+const API = import.meta.env.VITE_API_URL ?? "";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ export default function Login() {
       if (!res.ok) throw new Error("login failed");
       const { token } = await res.json();
       localStorage.setItem("token", token);
-      nav("/"); // redirige après succès
+      nav("/account"); // redirection vers le profil
     } catch {
       setErr("Échec de connexion");
     } finally {
@@ -34,7 +34,6 @@ export default function Login() {
   return (
     <section className="mx-auto max-w-md px-4 py-16">
       <h1 className="text-3xl font-display mb-6">Connexion</h1>
-
       <form onSubmit={onSubmit} className="space-y-4 bg-white p-6 rounded-2xl border border-ink/10">
         <input
           required

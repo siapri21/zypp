@@ -3,32 +3,28 @@ import { useEffect, useState } from "react";
 /** Types **/
 type Tab = "profile" | "rentals" | "invoices" | "payments";
 
-type User = {
-  email: string;
-  name?: string;
-};
+const tabs: { key: Tab; label: string }[] = [
+  { key: "profile", label: "Profil" },
+  { key: "rentals", label: "Locations" },
+  { key: "invoices", label: "Factures" },
+  { key: "payments", label: "Paiements" },
+];
 
-type Rental = {
-  _id: string;
-  scooterId: string;
-  startedAt: string | number | Date;
-  endedAt?: string | number | Date | null;
-  price: number;
-};
+type User = { email: string; name?: string };
+type Rental = { _id: string; scooterId: string; startedAt: string | number | Date; endedAt?: string | number | Date | null; price: number };
+type Invoice = { _id: string; createdAt: string | number | Date; provider: string; amount: number; status: "paid" | "unpaid" | "pending" | string };
+type PaymentMethod = { _id: string; provider: "card" | "paypal" | "applepay" | string; label?: string | null; last4?: string | null };
 
-type Invoice = {
-  _id: string;
-  createdAt: string | number | Date;
-  provider: string;
-  amount: number;
-  status: "paid" | "unpaid" | "pending" | string;
-};
-
-type PaymentMethod = {
-  _id: string;
-  provider: "card" | "paypal" | "applepay" | string;
-  label?: string | null;
-  last4?: string | null;
+/** Helper fetch avec token **/
+const apiFetch = async <T,>(url: string, init: RequestInit = {}): Promise<T> => {
+  const token = localStorage.getItem("token");
+  const headers = { ...init.headers, Authorization: token ? `Bearer ${token}` : "" };
+  const res = await fetch(url, { ...init, headers });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
 };
 
 /** Composant **/
@@ -36,25 +32,17 @@ export default function Account() {
   const [tab, setTab] = useState<Tab>("profile");
 
   const [user, setUser] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
 
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [pms, setPms] = useState<PaymentMethod[]>([]);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
-  /** Helpers **/
-  const fetchJSON = async <T,>(url: string, init?: RequestInit): Promise<T> => {
-    const res = await fetch(url, init);
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(text || `HTTP ${res.status}`);
-    }
-    return res.json() as Promise<T>;
-  };
+  const [error, setError] = useState<string | null>(null);
 
   /** Initial load **/
   useEffect(() => {
@@ -64,13 +52,14 @@ export default function Account() {
       setError(null);
       try {
         const [u, r, i, pm] = await Promise.all([
-          fetchJSON<User>("/api/me"),
-          fetchJSON<Rental[]>("/api/rentals"),
-          fetchJSON<Invoice[]>("/api/invoices"),
-          fetchJSON<PaymentMethod[]>("/api/payment-methods"),
+          apiFetch<User>("/api/me"),
+          apiFetch<Rental[]>("/api/me/rentals"),
+          apiFetch<Invoice[]>("/api/me/invoices"),
+          apiFetch<PaymentMethod[]>("/api/me/payment-methods"),
         ]);
         if (!alive) return;
         setUser(u);
+        setEmail(u.email ?? "");
         setName(u.name ?? "");
         setRentals(r);
         setInvoices(i);
@@ -93,12 +82,19 @@ export default function Account() {
     setSaving(true);
     setError(null);
     try {
-      const updated = await fetchJSON<User>("/api/me", {
-        method: "PUT",
+      const updated = await apiFetch<User>("/api/me", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({
+          name,
+          email,                          // utilise l’état email
+          password: password || undefined // vide => pas de changement
+        }),
       });
       setUser(updated);
+      setEmail(updated.email ?? "");
+      setName(updated.name ?? "");
+      setPassword("");
     } catch (e: any) {
       setError(e.message ?? "Impossible d’enregistrer le profil");
     } finally {
@@ -109,7 +105,7 @@ export default function Account() {
   const addPayment = async (provider: PaymentMethod["provider"]) => {
     setError(null);
     try {
-      const created = await fetchJSON<PaymentMethod>("/api/payment-methods", {
+      const created = await apiFetch<PaymentMethod>("/api/me/payment-methods", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider }),
@@ -123,7 +119,7 @@ export default function Account() {
   const removePayment = async (id: string) => {
     setError(null);
     try {
-      await fetchJSON<void>(`/api/payment-methods/${id}`, { method: "DELETE" });
+      await apiFetch<void>(`/api/me/payment-methods/${id}`, { method: "DELETE" });
       setPms((prev) => prev.filter((p) => p._id !== id));
     } catch (e: any) {
       setError(e.message ?? "Suppression échouée");
@@ -141,17 +137,15 @@ export default function Account() {
 
   return (
     <section className="mx-auto max-w-3xl p-4 space-y-6">
-      {/* Tabs */}
+      {/* Onglets */}
       <div className="flex gap-2">
-        {(["profile", "rentals", "invoices", "payments"] as const).map((t) => (
+        {tabs.map(({ key, label }) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-3 py-1 rounded ${
-              tab === t ? "bg-green text-white" : "border"
-            }`}
+            key={key}
+            onClick={() => setTab(key)}
+            className={`px-3 py-1 rounded ${tab === key ? "bg-green text-white" : "border"}`}
           >
-            {t}
+            {label}
           </button>
         ))}
       </div>
@@ -162,20 +156,39 @@ export default function Account() {
         </div>
       )}
 
-      {/* Profile */}
+      {/* Profil */}
       {tab === "profile" && (
         <div className="space-y-3 border rounded p-4">
-          <div>
-            Email: <b>{user?.email ?? "—"}</b>
-          </div>
+          <label className="block">
+            Email
+            <input
+              type="email"
+              className="block border rounded px-3 py-2 w-full mt-1"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+
           <label className="block">
             Nom
             <input
+              type="text"
               className="block border rounded px-3 py-2 w-full mt-1"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </label>
+
+          <label className="block">
+            Nouveau mot de passe
+            <input
+              type="password"
+              className="block border rounded px-3 py-2 w-full mt-1"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+
           <button
             onClick={saveProfile}
             disabled={saving}
@@ -186,7 +199,7 @@ export default function Account() {
         </div>
       )}
 
-      {/* Rentals */}
+      {/* Locations */}
       {tab === "rentals" && (
         <div className="border rounded p-4 overflow-auto">
           {rentals.length === 0 ? (
@@ -195,7 +208,7 @@ export default function Account() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left">
-                  <th className="py-1 pr-2">Trott</th>
+                  <th className="py-1 pr-2">Trottinette</th>
                   <th className="py-1 pr-2">Début</th>
                   <th className="py-1 pr-2">Fin</th>
                   <th className="py-1 pr-2">Prix</th>
@@ -205,14 +218,8 @@ export default function Account() {
                 {rentals.map((r) => (
                   <tr key={r._id} className="border-t">
                     <td className="py-2 pr-2">{r.scooterId}</td>
-                    <td className="py-2 pr-2">
-                      {new Date(r.startedAt).toLocaleString()}
-                    </td>
-                    <td className="py-2 pr-2">
-                      {r.endedAt
-                        ? new Date(r.endedAt).toLocaleString()
-                        : "—"}
-                    </td>
+                    <td className="py-2 pr-2">{new Date(r.startedAt).toLocaleString()}</td>
+                    <td className="py-2 pr-2">{r.endedAt ? new Date(r.endedAt).toLocaleString() : "—"}</td>
                     <td className="py-2 pr-2">{r.price.toFixed(2)} €</td>
                   </tr>
                 ))}
@@ -222,51 +229,29 @@ export default function Account() {
         </div>
       )}
 
-      {/* Invoices */}
+      {/* Factures */}
       {tab === "invoices" && (
         <div className="border rounded p-4">
           {invoices.length === 0 ? (
             <div className="text-sm text-gray-600">Aucune facture</div>
           ) : (
             invoices.map((i) => (
-              <div
-                key={i._id}
-                className="flex items-center justify-between border-b py-2"
-              >
-                <div>
-                  {new Date(i.createdAt).toLocaleDateString()} · {i.provider}
-                </div>
-                <div>
-                  {i.amount.toFixed(2)} € · {i.status}
-                </div>
+              <div key={i._id} className="flex items-center justify-between border-b py-2">
+                <div>{new Date(i.createdAt).toLocaleDateString()} · {i.provider}</div>
+                <div>{i.amount.toFixed(2)} € · {i.status}</div>
               </div>
             ))
           )}
         </div>
       )}
 
-      {/* Payments */}
+      {/* Paiements */}
       {tab === "payments" && (
         <div className="space-y-3 border rounded p-4">
           <div className="flex gap-2">
-            <button
-              onClick={() => addPayment("card")}
-              className="px-3 py-2 border rounded"
-            >
-              Ajouter carte
-            </button>
-            <button
-              onClick={() => addPayment("paypal")}
-              className="px-3 py-2 border rounded"
-            >
-              Ajouter PayPal
-            </button>
-            <button
-              onClick={() => addPayment("applepay")}
-              className="px-3 py-2 border rounded"
-            >
-              Ajouter Apple Pay
-            </button>
+            <button onClick={() => addPayment("card")} className="px-3 py-2 border rounded">Ajouter carte</button>
+            <button onClick={() => addPayment("paypal")} className="px-3 py-2 border rounded">Ajouter PayPal</button>
+            <button onClick={() => addPayment("applepay")} className="px-3 py-2 border rounded">Ajouter Apple Pay</button>
           </div>
 
           <ul>
@@ -274,20 +259,9 @@ export default function Account() {
               <li className="text-sm text-gray-600">Aucun moyen de paiement</li>
             ) : (
               pms.map((pm) => (
-                <li
-                  key={pm._id}
-                  className="flex items-center justify-between border-b py-2"
-                >
-                  <span>
-                    {pm.provider.toUpperCase()} {pm.label ?? ""}{" "}
-                    {pm.last4 ? `•••• ${pm.last4}` : ""}
-                  </span>
-                  <button
-                    onClick={() => removePayment(pm._id)}
-                    className="text-sm text-red-600"
-                  >
-                    Supprimer
-                  </button>
+                <li key={pm._id} className="flex items-center justify-between border-b py-2">
+                  <span>{pm.provider.toUpperCase()} {pm.label ?? ""} {pm.last4 ? `•••• ${pm.last4}` : ""}</span>
+                  <button onClick={() => removePayment(pm._id)} className="text-sm text-red-600">Supprimer</button>
                 </li>
               ))
             )}

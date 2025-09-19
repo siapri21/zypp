@@ -1,4 +1,4 @@
-import {  NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import { useI18n } from "../i18n";
@@ -14,12 +14,19 @@ const linkDefs = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { lang, setLang, t } = useI18n();
-  const {user, logout} = useAuth();
+  const { user, logout } = useAuth();
+  const { pathname } = useLocation();
+
+  // cache la barre sur login et register
+  if (pathname === "/login" || pathname === "/register") return null;
+
+  const linkCls = ({ isActive }: { isActive: boolean }) =>
+    `hover:text-[#7ED957 ] ${isActive ? "text-[#7ED957 ]" : ""}`;
 
   return (
     <header className="sticky top-0 z-50 bg-bg/50 backdrop-blur border-b border-ink/10">
       <nav className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-        <NavLink to="/" aria-label="home">
+        <NavLink to="/" aria-label="home" onClick={() => setOpen(false)}>
           <img src="/logo-removebg-preview.png" alt="logo" className="h-12 w-auto" />
         </NavLink>
 
@@ -30,10 +37,7 @@ export default function Navbar() {
         <ul className="hidden md:flex items-center gap-6">
           {linkDefs.map(l => (
             <li key={l.to}>
-              <NavLink
-                to={l.to}
-                className={({ isActive }) => `hover:text-[#7ED957 ] ${isActive ? "text-[#7ED957 ]" : ""}`}
-              >
+              <NavLink to={l.to} className={linkCls}>
                 {t(l.key)}
               </NavLink>
             </li>
@@ -58,7 +62,7 @@ export default function Navbar() {
                 {t("account") ?? "Mon compte"}
               </NavLink>
               <button
-                onClick={() => logout?.()}
+                onClick={() => logout()}
                 className="px-3 py-2 rounded-xl bg-ink text-white text-sm"
               >
                 {t("logout") ?? "Se déconnecter"}
@@ -81,7 +85,7 @@ export default function Navbar() {
         <ul className="md:hidden px-4 pb-4 space-y-2 border-t border-ink/10">
           {linkDefs.map(l => (
             <li key={l.to}>
-              <NavLink to={l.to} onClick={() => setOpen(false)}>
+              <NavLink to={l.to} onClick={() => setOpen(false)} className={linkCls}>
                 {t(l.key)}
               </NavLink>
             </li>
@@ -104,7 +108,7 @@ export default function Navbar() {
                   {t("account") ?? "Mon compte"}
                 </NavLink>
                 <button
-                  onClick={() => { logout?.(); setOpen(false); }}
+                  onClick={() => { logout(); setOpen(false); }}
                   className="px-3 py-2 rounded-xl bg-ink text-white text-sm"
                 >
                   {t("logout") ?? "Se déconnecter"}

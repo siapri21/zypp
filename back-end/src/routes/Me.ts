@@ -20,12 +20,21 @@ r.get("/", async (req: AuthReq, res) => {
 });
 
 // PATCH /api/me
+// PATCH /api/me
 r.patch("/", async (req: AuthReq, res) => {
   if (!req.user?.id) return res.sendStatus(401);
-  const { name, email } = req.body ?? {};
+
+  const { name, email, password } = req.body ?? {};
   const update: any = {};
+
   if (name != null) update.name = name;
-  if (email != null) update.email = email; // peut lever 11000 (duplicate)
+  if (email != null) update.email = email;
+  if (password != null) {
+    const bcrypt = await import("bcryptjs");
+    const hash = await bcrypt.hash(password, 10);
+    update.passwordHash = hash;
+  }
+
   try {
     const u = await User.findByIdAndUpdate(req.user.id, update, { new: true, lean: true });
     if (!u) return res.sendStatus(404);
@@ -36,6 +45,7 @@ r.patch("/", async (req: AuthReq, res) => {
     return res.sendStatus(500);
   }
 });
+
 
 // GET /api/me/rentals
 r.get("/rentals", async (req: AuthReq, res) => {
@@ -51,11 +61,22 @@ r.get("/invoices", async (req: AuthReq, res) => {
   return res.json(inv);
 });
 
+
+// GET /api/me/payment-methods
+r.get("/payment-methods", async (req: AuthReq, res) => {
+  if (!req.user?.id) return res.sendStatus(401);
+  const u = await User.findById(req.user.id).lean();
+  if (!u) return res.sendStatus(404);
+  return res.json(u.paymentMethods || []);
+});
+
 // POST /api/me/payment-methods
 r.post("/payment-methods", async (req: AuthReq, res) => {
   if (!req.user?.id) return res.sendStatus(401);
   const { provider, label, token, last4 } = req.body ?? {};
-  if (!provider || !token) return res.status(400).json({ error: "provider and token required" });
+  if (!provider || !token) {
+    return res.status(400).json({ error: "provider and token required" });
+  }
 
   const u = await User.findByIdAndUpdate(
     req.user.id,
@@ -65,6 +86,8 @@ r.post("/payment-methods", async (req: AuthReq, res) => {
   if (!u) return res.sendStatus(404);
   return res.status(201).json(u.paymentMethods);
 });
+
+
 
 // DELETE /api/me/payment-methods/:pmid
 r.delete("/payment-methods/:pmid", async (req: AuthReq, res) => {

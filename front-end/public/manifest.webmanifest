@@ -1,0 +1,9 @@
+{
+  "name": "Zypp",
+  "short_name": "Zypp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7ED957",
+  "icons": []
+}
