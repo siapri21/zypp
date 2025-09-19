@@ -56,7 +56,7 @@ export default function Login() {
           {loading ? "Connexion..." : "Se connecter"}
         </button>
         <p className="text-sm text-ink/70">
-          Pas de compte ? <Link to="/register" className="text-green">Inscription</Link>
+          Pas de compte ? <Link to="/register" className="text-[#7ED957 ]">Inscription</Link>
         </p>
         {err && <p className="text-red-600 text-sm">{err}</p>}
       </form>

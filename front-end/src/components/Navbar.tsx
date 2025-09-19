@@ -32,7 +32,7 @@ export default function Navbar() {
             <li key={l.to}>
               <NavLink
                 to={l.to}
-                className={({ isActive }) => `hover:text-green ${isActive ? "text-green" : ""}`}
+                className={({ isActive }) => `hover:text-[#7ED957 ] ${isActive ? "text-[#7ED957 ]" : ""}`}
               >
                 {t(l.key)}
               </NavLink>

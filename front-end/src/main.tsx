@@ -5,9 +5,11 @@ import App from "./App";
 import "./index.css";
 import { I18nProvider } from "./i18n"; // <-- ajout
 import { AuthProvider } from "./components/AuthCTA"; // <-- ajout
+import { HelmetProvider } from "react-helmet-async";
 
 createRoot(document.getElementById("root")!).render(
    <StrictMode>
+    <HelmetProvider>
     <AuthProvider>
       <BrowserRouter>
         <I18nProvider>
@@ -15,5 +17,6 @@ createRoot(document.getElementById("root")!).render(
         </I18nProvider>
       </BrowserRouter>
     </AuthProvider>
+    </HelmetProvider>
   </StrictMode>
 );

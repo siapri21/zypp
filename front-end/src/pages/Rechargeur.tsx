@@ -15,7 +15,7 @@ export default function Rechargeur() {
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 md:grid-cols-2">
           <header>
             <p className="inline-block rounded-full bg-[#BBECA5] px-3 py-1 text-sm font-medium text-[#343232]">Rejoignez le réseau</p>
-            <h1 className="mt-4 text-3xl font-bold leading-tight text-[#343232] md:text-5xl">Devenir rechargeur</h1>
+            <h1 className="mt-4 text-3xl font-bold leading-tight text-[#343232] md:text-greenxl">Devenir rechargeur</h1>
             <p className="mt-4 max-w-xl text-[#343232]/80">
               Ramassez et rechargez des trottinettes chez vous entre 21h et 6h. Rémunération à la
               trottinette et réductions sur vos trajets.

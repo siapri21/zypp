@@ -8,6 +8,11 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CityMap from "./pages/CityMap";
 import ProtectedRoute from "./components/ProtecteRoute";
+// import CookieButton from "./components/CookieBtn";
+import CookieConsent from "./components/CookieConsent";
+import MentionsLegales from "./pages/MentionsLegales";
+import CGU from "./pages/CGU";
+import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 
 export default function App() {
   return (
@@ -24,9 +29,18 @@ export default function App() {
           <Route path="/app" element={<Home anchor="app" />} />
           <Route path="/carte" element={<CityMap />} />
           <Route path="/account" element={<ProtectedRoute><Home anchor="account" /></ProtectedRoute>} />
+         <Route path="/mentions-legales" element={<MentionsLegales />} />
+         <Route path="/cgu" element={<CGU />} />
+         <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+         <Route path="*" element={<div className="p-6">404 - Page non trouvée</div>} />
+        {/* <Route path="/mentions-legales" element={<MentionsLegales />} />
+        <Route path="/cgu" element={<CGU />} />
+        <Route path="/politique-confidentialite" element={<PrivacyPolicy />} /> */}
         </Routes>
       </main>
       <Footer />
+      {/* <CookieButton /> */}
+      <CookieConsent />
     </div>
   );
 }

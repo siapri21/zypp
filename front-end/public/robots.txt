@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zypp-ztyy.vercel.app/sitemap.xml

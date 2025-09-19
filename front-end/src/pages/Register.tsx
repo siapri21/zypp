@@ -62,7 +62,7 @@ export default function Register() {
             {loading ? "Création..." : "Créer mon compte"}
           </button>
           <p className="text-sm text-ink/70">
-            Déjà inscrit ? <Link to="/login" className="text-green">Connexion</Link>
+            Déjà inscrit ? <Link to="/login" className="text-[#7ED957 ]">Connexion</Link>
           </p>
           {err && <p className="text-red-600 text-sm">{err}</p>}
         </form>
