@@ -1,22 +1,28 @@
-// src/components/CookieConsent.tsx
 import { useEffect, useState, useCallback } from "react";
+
+declare global {
+  interface Window {
+    dataLayer?: any[];
+    gtag?: (...args: any[]) => void;
+  }
+}
 
 type Consent = {
   necessary: true;
   analytics: boolean;
   ads: boolean;
-  ts: number; // ms epoch
+  ts: number;
 };
 
 const STORAGE_KEY = "zypp_cookie_consent_v1";
-const THIRTEEN_MONTHS_MS = 13 * 30 * 24 * 60 * 60 * 1000; // approx 13 mois
+const THIRTEEN_MONTHS_MS = 13 * 30 * 24 * 60 * 60 * 1000; // ~13 mois
+const GA_ID = ""; // ex: "G-XXXXXXX"
 
 function getStored(): Consent | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const c: Consent = JSON.parse(raw);
-    // expire à 13 mois
     if (Date.now() - c.ts > THIRTEEN_MONTHS_MS) {
       localStorage.removeItem(STORAGE_KEY);
       return null;
@@ -29,26 +35,25 @@ function getStored(): Consent | null {
 
 function setStored(c: Consent) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(c));
-  // Exemple: notifier un TMS/gtag si tu l’utilises
-  // (window as any).gtag?.("consent", "update", {
+  // Exemple: notifier gtag si déjà chargé
+  // window.gtag?.("consent", "update", {
   //   analytics_storage: c.analytics ? "granted" : "denied",
   //   ad_storage: c.ads ? "granted" : "denied",
   // });
 }
 
-// Option: chargement GA si analytics accepté
-const GA_ID = ""; // ex: "G-XXXXXXX"
 function loadGA() {
-  if (!GA_ID || (window as any).dataLayer) return;
-  (window as any).dataLayer = (window as any).dataLayer || [];
-  function gtag(){ (window as any).dataLayer.push(arguments); }
-  (window as any).gtag = gtag as any;
+  if (!GA_ID) return;
+  if (!window.dataLayer) window.dataLayer = [];
+  if (!window.gtag) window.gtag = (...args: any[]) => window.dataLayer!.push(args);
+
   const s = document.createElement("script");
   s.async = true;
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   document.head.appendChild(s);
-  gtag("js", new Date());
-  gtag("config", GA_ID, { anonymize_ip: true });
+
+  window.gtag?.("js", new Date() as any);
+  window.gtag?.("config", GA_ID, { anonymize_ip: true } as any);
 }
 
 export default function CookieConsent() {
@@ -57,7 +62,6 @@ export default function CookieConsent() {
   const [analytics, setAnalytics] = useState(false);
   const [ads, setAds] = useState(false);
 
-  // ouvrir si pas de consentement
   useEffect(() => {
     if (!consent) setOpen(true);
     else {
@@ -67,7 +71,6 @@ export default function CookieConsent() {
     }
   }, [consent]);
 
-  // bloquer le scroll quand modale ouverte
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -89,7 +92,6 @@ export default function CookieConsent() {
     if (analytics) loadGA();
   };
 
-  // Échap pour fermer
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     window.addEventListener("keydown", onKey);
