@@ -1,8 +1,9 @@
+// src/pages/Accounts.tsx
 import { useEffect, useState } from "react";
+import type { User, Rental, Invoice, PaymentMethod } from "../types/me";
 
-/** Types **/
+/** Tabs **/
 type Tab = "profile" | "rentals" | "invoices" | "payments";
-
 const tabs: { key: Tab; label: string }[] = [
   { key: "profile", label: "Profil" },
   { key: "rentals", label: "Locations" },
@@ -10,25 +11,16 @@ const tabs: { key: Tab; label: string }[] = [
   { key: "payments", label: "Paiements" },
 ];
 
-type User = { email: string; name?: string };
-type Rental = { _id: string; scooterId: string; startedAt: string | number | Date; endedAt?: string | number | Date | null; price: number };
-type Invoice = { _id: string; createdAt: string | number | Date; provider: string; amount: number; status: "paid" | "unpaid" | "pending" | string };
-type PaymentMethod = { _id: string; provider: "card" | "paypal" | "applepay" | string; label?: string | null; last4?: string | null };
-
 /** Helper fetch avec token **/
 const apiFetch = async <T,>(url: string, init: RequestInit = {}): Promise<T> => {
   const token = localStorage.getItem("token");
   const headers = { ...init.headers, Authorization: token ? `Bearer ${token}` : "" };
   const res = await fetch(url, { ...init, headers });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `HTTP ${res.status}`);
-  }
+  if (!res.ok) throw new Error((await res.text().catch(() => "")) || `HTTP ${res.status}`);
   return res.json() as Promise<T>;
 };
 
-/** Composant **/
-export default function Account() {
+export default function Accounts() {
   const [tab, setTab] = useState<Tab>("profile");
 
   const [user, setUser] = useState<User | null>(null);
@@ -47,36 +39,44 @@ export default function Account() {
   /** Initial load **/
   useEffect(() => {
     let alive = true;
-    const load = async () => {
+    (async () => {
       setLoading(true);
       setError(null);
       try {
-        const [u, r, i, pm] = await Promise.all([
-          apiFetch<User>("/api/me"),
+        const [uRes, rRes, iRes, pmRes] = await Promise.all([
+          apiFetch<{ user: User }>("/api/me").catch(() => null),
           apiFetch<Rental[]>("/api/me/rentals"),
           apiFetch<Invoice[]>("/api/me/invoices"),
-          apiFetch<PaymentMethod[]>("/api/me/payment-methods"),
+          apiFetch<PaymentMethod[]>("/api/me/payment-methods").catch(() => [] as PaymentMethod[]),
         ]);
+
         if (!alive) return;
-        setUser(u);
-        setEmail(u.email ?? "");
-        setName(u.name ?? "");
-        setRentals(r);
-        setInvoices(i);
-        setPms(pm);
+
+        if (uRes?.user) {
+          setUser(uRes.user);
+          setEmail(uRes.user.email ?? "");
+          setName(uRes.user.name ?? "");
+        }
+        setRentals(rRes);
+        setInvoices(iRes);
+        setPms(pmRes || []);
       } catch (e: any) {
         if (alive) setError(e.message ?? "Erreur inattendue");
       } finally {
         if (alive) setLoading(false);
       }
-    };
-    load();
+    })();
     return () => {
       alive = false;
     };
   }, []);
 
   /** Actions **/
+  const reloadInvoices = async () => {
+    const i = await apiFetch<Invoice[]>("/api/me/invoices");
+    setInvoices(i);
+  };
+
   const saveProfile = async () => {
     if (!user) return;
     setSaving(true);
@@ -87,8 +87,8 @@ export default function Account() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          email,                          // utilise l’état email
-          password: password || undefined // vide => pas de changement
+          email,
+          password: password || undefined,
         }),
       });
       setUser(updated);
@@ -105,10 +105,11 @@ export default function Account() {
   const addPayment = async (provider: PaymentMethod["provider"]) => {
     setError(null);
     try {
+      // si ta route exige un token, ajoute { token: "demo-token" }
       const created = await apiFetch<PaymentMethod>("/api/me/payment-methods", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider }),
+        body: JSON.stringify({ provider, token: "demo-token" }),
       });
       setPms((prev) => [created, ...prev]);
     } catch (e: any) {
@@ -123,6 +124,16 @@ export default function Account() {
       setPms((prev) => prev.filter((p) => p._id !== id));
     } catch (e: any) {
       setError(e.message ?? "Suppression échouée");
+    }
+  };
+
+  const payInvoice = async (id: string, method: string = "paypal") => {
+    setError(null);
+    try {
+      await apiFetch(`/api/me/invoices/${id}/pay?method=${method}&simulate=true`, { method: "POST" });
+      await reloadInvoices();
+    } catch (e: any) {
+      setError(e.message ?? "Paiement échoué");
     }
   };
 
@@ -220,7 +231,7 @@ export default function Account() {
                     <td className="py-2 pr-2">{r.scooterId}</td>
                     <td className="py-2 pr-2">{new Date(r.startedAt).toLocaleString()}</td>
                     <td className="py-2 pr-2">{r.endedAt ? new Date(r.endedAt).toLocaleString() : "—"}</td>
-                    <td className="py-2 pr-2">{r.price.toFixed(2)} €</td>
+                    <td className="py-2 pr-2">{(r.priceCents / 100).toFixed(2)} €</td>
                   </tr>
                 ))}
               </tbody>
@@ -237,8 +248,15 @@ export default function Account() {
           ) : (
             invoices.map((i) => (
               <div key={i._id} className="flex items-center justify-between border-b py-2">
-                <div>{new Date(i.createdAt).toLocaleDateString()} · {i.provider}</div>
-                <div>{i.amount.toFixed(2)} € · {i.status}</div>
+                <div>{new Date(i.createdAt).toLocaleDateString()} · {i.method}</div>
+                <div className="flex items-center gap-2">
+                  <span>{(i.amountCents / 100).toFixed(2)} € · {i.status}</span>
+                  {i.status === "issued" && (
+                    <button className="px-2 py-1 border rounded" onClick={() => payInvoice(i._id, "paypal")}>
+                      Payer
+                    </button>
+                  )}
+                </div>
               </div>
             ))
           )}

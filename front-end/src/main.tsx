@@ -6,10 +6,13 @@ import "./index.css";
 import { I18nProvider } from "./i18n"; // <-- ajout
 import { AuthProvider } from "./components/AuthCTA"; // <-- ajout
 import { HelmetProvider } from "react-helmet-async";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./queryClient"; // <-- ajout
 
 createRoot(document.getElementById("root")!).render(
    <StrictMode>
-    <HelmetProvider>
+   <QueryClientProvider client={queryClient}>
+   <HelmetProvider>
     <AuthProvider>
       <BrowserRouter>
         <I18nProvider>
@@ -18,5 +21,6 @@ createRoot(document.getElementById("root")!).render(
       </BrowserRouter>
     </AuthProvider>
     </HelmetProvider>
+   </QueryClientProvider>
   </StrictMode>
 );

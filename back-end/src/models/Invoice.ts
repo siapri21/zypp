@@ -1,24 +1,22 @@
 // back-end/src/models/Invoice.ts
 import { Schema, model } from "mongoose";
 
-
-const itemSchema = new Schema({
-description: String,
-qty: Number,
-unitPrice: Number,
+const ItemSchema = new Schema({
+  description: String,
+  qty: Number,
+  unitPrice: Number,
 });
 
+const InvoiceSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+  rentalId: { type: Schema.Types.ObjectId, ref: "Rental", required: true },
+  amountCents: { type: Number, required: true },
+  currency: { type: String, default: "EUR" },
+  status: { type: String, enum: ["draft","issued","paid","void"], default: "issued", index: true },
+  method: { type: String, enum: ["paypal","applepay","card","none"], default: "none" },
+  paidAt: Date,
+  items: [ItemSchema],
+},{ timestamps:true });
 
-const invoiceSchema = new Schema(
-{
-userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-amount: { type: Number, required: true },
-status: { type: String, enum: ["paid", "open", "void"], default: "paid" },
-provider: { type: String, enum: ["card", "paypal", "applepay"], required: true },
-items: [itemSchema],
-},
-{ timestamps: true }
-);
-
-
-export default model("Invoice", invoiceSchema);
+InvoiceSchema.index({ userId: 1, createdAt: -1 });
+export default model("Invoice", InvoiceSchema);
