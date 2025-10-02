@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL ?? "";
+const API = import.meta.env.VITE_API_URL ?? "https://backend-zypp.onrender.com";
 
 export default function Login() {
   const [email, setEmail] = useState("");

@@ -11,8 +11,7 @@ const app = express();
 // CORS: autorise ton front Vercel + localhost
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:3000",
-  process.env.FRONTEND_URL || "https://zypp-ztyy-bwk51ogto-siapri21s-projects.vercel.app" // adapte avec ton vrai domaine
+   process.env.FRONTEND_URL || "https://zypp-ztyy-bwk51ogto-siapri21s-projects.vercel.app" 
 ].filter(Boolean);
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));

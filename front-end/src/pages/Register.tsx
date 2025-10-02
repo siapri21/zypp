@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL ?? ""; // si proxy Vite, laisse vide
+const API = import.meta.env.VITE_API_URL ?? "https://backend-zypp.onrender.com"; // si proxy Vite, laisse vide
 
 export default function Register() {
   const [name, setName] = useState("");
